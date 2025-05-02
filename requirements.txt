@@ -1,0 +1,11 @@
+streamlit
+pandas
+requests
+sqlalchemy
+jose
+uvicorn
+fastapi
+pydantic
+fastapi[all]
+oauth2
+dotenv
