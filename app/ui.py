@@ -154,7 +154,7 @@ def render_dashboard(token):
 
             # Aggregation & sorting
             st.markdown("### 📊 Charts & Aggregation")
-
+            st.markdown("#### Coming Soon!")
             numeric_cols = filtered.select_dtypes(include=["int", "float"]).columns.tolist()
             if numeric_cols:
                 group_col = st.selectbox("Group By Column", available_columns)
