@@ -1,4 +1,12 @@
 import streamlit as st
+
+# Health check endpoint
+def health_check():
+    return {"status": "ok"}
+
+# Add a URL route for health check
+if st.experimental_get_query_params().get("health_check"):
+    st.json(health_check())
 from app.ui import render_dashboard
 from app.db import init_db
 from app.auth import login
