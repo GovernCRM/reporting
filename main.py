@@ -1,22 +1,28 @@
 import streamlit as st
+import logging
+import sys
 
-# Health check endpoint
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+
 def health_check():
     return {"status": "ok"}
 
-# Add a URL route for health check
 if st.experimental_get_query_params().get("health_check"):
     st.json(health_check())
+
 from app.ui import render_dashboard
 from app.db import init_db
 from app.auth import login
 import os
 
-# Set page title
 st.title(os.getenv("PAGE_TITLE", "Buildly Reporting"))
 st.caption("Powered by Buildly Open Core")
 
-# Create login form
 with st.form("login_form"):
     username = st.text_input("Username or Email")
     password = st.text_input("Password", type="password")
@@ -28,29 +34,29 @@ if submitted:
     else:
         with st.spinner("Logging in..."):
             try:
-                # Attempt to login and get user data
+                logging.info("Attempting login for user: %s", username)
                 user_data = login(username, password)
-                # Store the token in session state for later use
                 st.session_state["user_data"] = user_data
-                
-                # Show success message
                 st.success("Login successful!")
-                
                 with st.spinner("Loading dashboard..."):
-                    # Initialize database and render dashboard
                     init_db()
                     render_dashboard(user_data["access_token"])
-                    
             except ValueError as e:
+                logging.error("Login failed: %s", str(e))
                 st.error(f"Login failed: {str(e)}")
                 st.info("Please check your credentials and try again.")
+            except Exception as e:
+                logging.exception("Unexpected error during login")
+                st.error(f"Unexpected error: {str(e)}")
 elif "user_data" in st.session_state:
-    # If already logged in, show the dashboard
     with st.spinner("Loading dashboard..."):
-        init_db()
-        render_dashboard(st.session_state["user_data"]["access_token"])
+        try:
+            init_db()
+            render_dashboard(st.session_state["user_data"]["access_token"])
+        except Exception as e:
+            logging.exception("Error loading dashboard")
+            st.error(f"Error loading dashboard: {str(e)}")
 
-# Add helpful message at the bottom
 st.markdown("---")
 st.markdown("""
     Having trouble logging in?
